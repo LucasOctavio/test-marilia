@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, create_engine
+from sqlalchemy import Column, Integer, String, Boolean, create_engine, ForeignKey, JSON
 from sqlalchemy.orm import DeclarativeBase
 from dotenv import load_dotenv
 from passlib.hash import sha256_crypt as sha256
@@ -21,17 +21,15 @@ class Base(DeclarativeBase):
     pass
 
 
-git push -u origin main
-
-
 class Usuario(Base):
     __tablename__ = 'Usuario'
 
     id = Column('id', Integer, autoincrement=True, primary_key=True)
     nome = Column('nome', String(255), nullable=False, unique=True)
-    email = Column('email', String(255), nullable=False, unique=True)
     senha = Column('senha', String(255), nullable=False)
     nivel = Column('nivel', Integer)
+    acerto_total = Column('acerto_total', Integer)
+    erro_total = Column('erro_total', Integer)
 
     def criptografar(self,senha):
            self.senha = sha256.encrypt(senha)
@@ -39,5 +37,27 @@ class Usuario(Base):
     def verify(self,senha):
          resultado = sha256.verify(senha, self.senha)
          return resultado
-    
+
+class Perguta(Base):
+     __tablename__ = 'Pergunta'
+
+     id = Column('id', Integer, autoincrement=True, primary_key=True)
+     categoria_id = Column('categoria', String(255), ForeignKey('Categoria.id'))
+     pergunta = Column('pergunta', String(2000), nullable=False )
+     alternativas = Column('alternativas', JSON)                            #NOTE - vai ser um dicionario de listas = {[{}]}
+     resposta = Column('resposta', String(1))
+     feedback = Column('feedback', String(2000))
+
+class Categoria(Base):
+     __tablename__ = 'Categoria'
+     
+     id = Column('id', Integer, autoincrement=True, primary_key=True)
+     nome = Column('nome', String(255), nullable=False)
+
+class Registro(Base):
+     __tablename__ = 'Registro'
+
+     id = Column('id', Integer, autoincrement=True, primary_key=True)
+     categoria_id = Column('categoria_id', Integer, ForeignKey("Categoria.id"))
+
 Base.metadata.create_all(engine)
