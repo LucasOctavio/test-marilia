@@ -1,0 +1,14 @@
+{
+    "sqltools.connections": [
+        {
+            "ssh": "Disabled",
+            "previewLimit": 50,
+            "server": "72.60.51.158",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "Banco nunes test",
+            "database": "test",
+            "username": "test"
+        }
+    ]
+}
