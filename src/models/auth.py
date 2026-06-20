@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, create_engine, ForeignKey, JSON
+from sqlalchemy import Column, Integer, String, create_engine, ForeignKey, JSON
 from sqlalchemy.orm import DeclarativeBase
 from dotenv import load_dotenv
 from passlib.hash import sha256_crypt as sha256
@@ -24,7 +24,7 @@ class Base(DeclarativeBase):
 class Usuario(Base):
     __tablename__ = 'Usuario'
 
-    id = Column('id', Integer, autoincrement=True, primary_key=True)
+    id = Column('id', Integer, autoincrement=True, primary_key=True, unique=True)
     nome = Column('nome', String(255), nullable=False, unique=True)
     senha = Column('senha', String(255), nullable=False)
     nivel = Column('nivel', Integer)
@@ -41,23 +41,23 @@ class Usuario(Base):
 class Perguta(Base):
      __tablename__ = 'Pergunta'
 
-     id = Column('id', Integer, autoincrement=True, primary_key=True)
+     id = Column('id', Integer, autoincrement=True, primary_key=True, unique=True)
      categoria_id = Column('categoria', String(255), ForeignKey('Categoria.id'))
      pergunta = Column('pergunta', String(2000), nullable=False )
-     alternativas = Column('alternativas', JSON)                            #NOTE - vai ser um dicionario de listas = {[{}]}
+     alternativas = Column('alternativas', JSON)                                    #NOTE - vai ser um dicionario de listas = {[{}]}
      resposta = Column('resposta', String(1))
      feedback = Column('feedback', String(2000))
 
 class Categoria(Base):
      __tablename__ = 'Categoria'
      
-     id = Column('id', Integer, autoincrement=True, primary_key=True)
+     id = Column('id', Integer, autoincrement=True, primary_key=True, unique=True)
      nome = Column('nome', String(255), nullable=False)
 
 class Registro(Base):
      __tablename__ = 'Registro'
 
-     id = Column('id', Integer, autoincrement=True, primary_key=True)
+     id = Column('id', Integer, autoincrement=True, primary_key=True, unique=True)
      categoria_id = Column('categoria_id', Integer, ForeignKey("Categoria.id"))
-
-Base.metadata.create_all(engine)
+     user_id = Column('user_id', Integer, ForeignKey("Usuario.id"))
+     acerto_categoria = Column('acerto_categoria', Integer)
