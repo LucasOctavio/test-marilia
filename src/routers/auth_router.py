@@ -3,10 +3,9 @@ from typing import Annotated
 from models.model import Usuario
 from dependencies import Session as ses
 
+auth_router = APIRouter(prefix='/auth', tags=['Auth'])
 
-router = APIRouter(prefix='/auth', tags=['Auth'])
-
-@router.get('/login')
+@auth_router.get('/login')
 async def login(nome:str, senha:str, session = Depends(ses)):
     usuario = session.query(Usuario).filter(Usuario.nome == nome).first()
     if usuario:
@@ -17,7 +16,7 @@ async def login(nome:str, senha:str, session = Depends(ses)):
     else:
         return {'mensagem': 'Usuario não encontrado'}
 
-@router.post('/criar_conta')
+@auth_router.post('/criar_conta')
 async def criar_conta(nome:str, senha:str, session = Depends(ses)):
     usuario = session.query(Usuario).filter(Usuario.nome == nome).first()
     if usuario:
@@ -30,7 +29,7 @@ async def criar_conta(nome:str, senha:str, session = Depends(ses)):
         return {'mensagem':'Usuario criado com sucesso!'}
     
 
-@router.get("/listar_dados")
+@auth_router.get("/listar_dados")
 async def dados(nome : Annotated[str | None, Header()] = None, session = Depends(ses)) :
     user = session.query(Usuario).filter(Usuario.nome == nome).first()
     if user:
@@ -46,7 +45,7 @@ async def dados(nome : Annotated[str | None, Header()] = None, session = Depends
     else:
         return {'mensagem': 'Usuario não encontrado'}
 
-@router.get('/nivel')
+@auth_router.get('/nivel')
 async def listar_nivel(nome:str, session = Depends(ses)):
     usuario = session.query(Usuario).filter(Usuario.nome == nome).first()
     if not usuario:
@@ -54,7 +53,7 @@ async def listar_nivel(nome:str, session = Depends(ses)):
     nivel = usuario.nivel    
     return nivel
 
-@router.delete('/deletar_usuario')
+@auth_router.delete('/deletar_usuario')
 async def deletar_user(nome:str, session = Depends(ses)):
     usuario = session.query(Usuario).filter(Usuario.nome == nome).first()
     session.delete(usuario)
