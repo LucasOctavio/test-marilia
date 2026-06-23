@@ -1,18 +1,27 @@
 from pydantic import BaseModel
-from typing import Optional
 
-# --- USUÁRIO ---
 class UsuarioBase(BaseModel):
     nome: str
 
-class UsuarioAuthSchema(UsuarioBase):
+class UsuarioCreate(UsuarioBase):
     senha: str
 
-class UsuarioResponseSchema(UsuarioBase):
+class UsuarioLogin(UsuarioBase):
+    senha: str
+
+class UsuarioResponse(UsuarioBase):
     id: int
-    nivel: Optional[int] = None
-    acerto_total: Optional[int] = None
-    erro_total: Optional[int] = None
+    nivel: int
+    acerto_total: int
+    erro_total: int
 
     class Config:
         from_attributes = True
+
+class MensagemResponse(BaseModel):
+    mensagem: str
+
+
+class UsuarioUpdateProgresso(BaseModel):
+    acerto_total: int
+    erro_total: int

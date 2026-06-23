@@ -1,61 +1,40 @@
-from fastapi import APIRouter, Header, Depends
+from fastapi import APIRouter, Depends, Header, HTTPException
+from sqlalchemy.orm import Session
 from typing import Annotated
-from models.model import Usuario
-from dependencies import Session as ses
+from ..schemas.usuario_schema import UsuarioCreate, UsuarioLogin, UsuarioResponse, MensagemResponse
+from ..services.auth_service import login, criar_conta, dados, listar_nivel, deletar_user
+from ..dependencies import get_session
 
-auth_router = APIRouter(prefix='/auth', tags=['Auth'])
+auth_router = APIRouter(prefix="/auth", tags=["Autenticação e Usuários"])
 
-@auth_router.get('/login')
-async def login(nome:str, senha:str, session = Depends(ses)):
-    usuario = session.query(Usuario).filter(Usuario.nome == nome).first()
-    if usuario:
-        if usuario.verify(senha) == True:
-            return {'mensagem':'usuario autenticado'}
-        else:
-            return {'Mensagem':'Usuario ou Senha incorretos'}
-    else:
-        return {'mensagem': 'Usuario não encontrado'}
 
-@auth_router.post('/criar_conta')
-async def criar_conta(nome:str, senha:str, session = Depends(ses)):
-    usuario = session.query(Usuario).filter(Usuario.nome == nome).first()
-    if usuario:
-        return {'mensagem':'Usuario já criado'}        
-    else:
-        novo_user = Usuario(nome=nome, senha=senha)
-        novo_user.criptografar(senha)
-        session.add(novo_user)
-        session.commit()
-        return {'mensagem':'Usuario criado com sucesso!'}
-    
+@auth_router.post("/login", response_model=MensagemResponse, status_code=200)
+def rota_login(credenciais: UsuarioLogin, db: Session = Depends(get_session)):
+    return login(db, credenciais)
 
-@auth_router.get("/listar_dados")
-async def dados(nome : Annotated[str | None, Header()] = None, session = Depends(ses)) :
-    user = session.query(Usuario).filter(Usuario.nome == nome).first()
-    if user:
-        usuario = session.query(Usuario).filter(Usuario.nome == nome).first()
-        user_dados = {
-                      "id":usuario.id,
-                      'nome':usuario.nome,
-                      'nivel':usuario.nivel,
-                      'acerto_total':usuario.acerto_total,
-                      'erro_total':usuario.erro_total
-                      }
-        return user_dados
-    else:
-        return {'mensagem': 'Usuario não encontrado'}
 
-@auth_router.get('/nivel')
-async def listar_nivel(nome:str, session = Depends(ses)):
-    usuario = session.query(Usuario).filter(Usuario.nome == nome).first()
-    if not usuario:
-        return {'mensagem': 'Usuário não encontrado'}
-    nivel = usuario.nivel    
-    return nivel
+@auth_router.post("/registro", response_model=UsuarioResponse, status_code=201)
+def rota_criar_conta(dados: UsuarioCreate, db: Session = Depends(get_session)):
+    return criar_conta(db, dados)
 
-@auth_router.delete('/deletar_usuario')
-async def deletar_user(nome:str, session = Depends(ses)):
-    usuario = session.query(Usuario).filter(Usuario.nome == nome).first()
-    session.delete(usuario)
-    session.commit()
-    return {'mensagem':'Usuario excluido com sucesso'}
+
+@auth_router.get("/meus-dados", response_model=UsuarioResponse, status_code=200)
+def rota_dados(nome: Annotated[str | None, Header()] = None, db: Session = Depends(get_session)):
+    # O router pega o Header HTTP e envia a string para o Service
+    if not nome:
+        raise HTTPException(status_code=400, detail="Header 'nome' não informado")
+    return dados(db, nome)
+
+
+@auth_router.get("/meu-nivel", status_code=200)
+def rota_listar_nivel(nome: Annotated[str | None, Header()] = None, db: Session = Depends(get_session)):
+    if not nome:
+        raise HTTPException(status_code=400, detail="Header 'nome' não informado")
+    return listar_nivel(db, nome)
+
+
+@auth_router.delete("/deletar", status_code=204)
+def rota_deletar_user(nome: Annotated[str | None, Header()] = None, db: Session = Depends(get_session)):
+    if not nome:
+        raise HTTPException(status_code=400, detail="Header 'nome' não informado")
+    return deletar_user(db, nome)

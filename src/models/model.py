@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, create_engine, ForeignKey, JSON
 from passlib.hash import sha256_crypt as sha256
-from main import Base
+from ..main import Base
 
 class Usuario(Base):
     __tablename__ = 'Usuario'
@@ -26,7 +26,7 @@ class Usuario(Base):
          resultado = sha256.verify(senha, self.senha)
          return resultado
 
-class Perguta(Base):
+class Pergunta(Base):
      __tablename__ = 'Pergunta'
 
      id = Column('id', Integer, autoincrement=True, primary_key=True, unique=True)
