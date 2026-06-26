@@ -1,4 +1,4 @@
-from ..models.model import Registro
+from src.models.model import Registro
 from fastapi import HTTPException
 
 def criar_registro(db, dados):
@@ -13,7 +13,15 @@ def criar_registro(db, dados):
         db.add(novo_registro)
         db.commit()
         db.refresh(novo_registro)
-        return {"mensagem": "Registro criado com sucesso."}
+        return {
+            "mensagem": "Registro criado com sucesso.",
+            "registro": {
+                "id": novo_registro.id,
+                "categoria_id": novo_registro.categoria_id,
+                "user_id": novo_registro.user_id,
+                "acerto_categoria": novo_registro.acerto_categoria,
+            },
+        }
     except Exception:
         db.rollback()
         raise HTTPException(
@@ -49,7 +57,15 @@ def atualizar_registro(db, registro_id, dados):
     try:
         db.commit()
         db.refresh(registro)
-        return {"mensagem": "Registro atualizado com sucesso."}
+        return {
+            "mensagem": "Registro atualizado com sucesso.",
+            "registro": {
+                "id": registro.id,
+                "categoria_id": registro.categoria_id,
+                "user_id": registro.user_id,
+                "acerto_categoria": registro.acerto_categoria,
+            },
+        }
     except Exception:
         db.rollback()
         raise HTTPException(
@@ -61,6 +77,10 @@ def deletar_registro(db, registro_id):
     """DELETE: Remove um registro existente."""
     registro = buscar_registro_por_id(db, registro_id)
     
-    db.delete(registro)
-    db.commit()
-    return {"mensagem": "Registro deletado com sucesso."}
+    try:
+        db.delete(registro)
+        db.commit()
+        return {"mensagem": "Registro deletado com sucesso."}
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(status_code=400, detail="Não foi possível deletar o registro.") from exc

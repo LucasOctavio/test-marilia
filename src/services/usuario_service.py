@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from ..models.model import Usuario
+from src.models.model import Usuario
 from fastapi import HTTPException
 
 
@@ -18,7 +18,7 @@ def criar_usuario(usuario_input, db):
         db.add(novo_usuario)
         db.commit()
         db.refresh(novo_usuario)
-        return {"mensagem": "Usuário criado com sucesso."}
+        return {"mensagem": "Usuário criado com sucesso.", "usuario": novo_usuario}
     except Exception:
         db.rollback()
         raise HTTPException(status_code=400, detail=f"O nome de usuário '{usuario_input.nome}' já está em uso.")
@@ -45,12 +45,16 @@ def atualizar_progresso(usuario_id, dados, db):
     if not usuario:
         raise HTTPException(status_code=404, detail=f"Não foi possível atualizar: Usuário com ID {usuario_id} não existe.")
 
-    usuario.acerto_total = dados.acerto_total
-    usuario.erro_total = dados.erro_total
+    try:
+        usuario.acerto_total = dados.acerto_total
+        usuario.erro_total = dados.erro_total
 
-    db.commit()
-    db.refresh(usuario)
-    return {"mensagem": "Progresso atualizado com sucesso."}
+        db.commit()
+        db.refresh(usuario)
+        return {"mensagem": "Progresso atualizado com sucesso.", "usuario": usuario}
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(status_code=400, detail="Não foi possível atualizar o progresso do usuário.") from exc
 
 def deletar_usuario(usuario_id, db):
     """DELETE: Remove um usuário.
@@ -62,6 +66,10 @@ def deletar_usuario(usuario_id, db):
     if not usuario:
         raise HTTPException(status_code=404, detail=f"Não foi possível deletar: Usuário com ID {usuario_id} não existe.")
 
-    db.delete(usuario)
-    db.commit()
-    return {"mensagem": "Usuário deletado com sucesso."}
+    try:
+        db.delete(usuario)
+        db.commit()
+        return {"mensagem": "Usuário deletado com sucesso."}
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(status_code=400, detail="Não foi possível deletar o usuário porque ele está vinculado a registros.") from exc

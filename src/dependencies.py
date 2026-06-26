@@ -1,4 +1,4 @@
-from .main import engine
+from src.main import engine
 from sqlalchemy.orm import sessionmaker
 
 # dependencia para criar a session

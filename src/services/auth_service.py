@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
-from ..models.model import Usuario
+from src.models.model import Usuario
 
 
 def login(db, credenciais):

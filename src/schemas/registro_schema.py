@@ -16,3 +16,8 @@ class RegistroResponse(RegistroBase):
 
     class Config:
         from_attributes = True
+
+
+class RegistroMensagemResponse(BaseModel):
+    mensagem: str
+    registro: RegistroResponse

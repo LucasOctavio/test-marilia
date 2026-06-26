@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import declarative_base
 from dotenv import load_dotenv
 import os
 
@@ -44,8 +44,7 @@ URL = f"postgresql+psycopg2://{db_user}:{db_password}@{host_part}/{db_name}"
 engine = create_engine(URL, echo=True)
 
 # criaçao da Base
-class Base(DeclarativeBase):
-    pass
+Base = declarative_base()
 
 # importaçoes das rotas
 from .routers.auth_router import auth_router

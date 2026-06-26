@@ -1,19 +1,19 @@
 from fastapi import HTTPException
-from ..models.model import Categoria
+from src.models.model import Categoria
 
 
 def criar_categoria(categoria_input, db):
     """CREATE: Cria uma nova categoria.
 
     Recebe o schema `CategoriaCreate`, valida a existência e salva no banco.
-    Retorna uma mensagem de sucesso.
+    Retorna o objeto da categoria criada.
     """
     nova_categoria = Categoria(nome=categoria_input.nome)
     try:
         db.add(nova_categoria)
         db.commit()
         db.refresh(nova_categoria)
-        return {"mensagem": "Categoria criada com sucesso."}
+        return {"mensagem": "Categoria criada com sucesso.", "categoria": nova_categoria}
     except Exception:
         db.rollback()
         raise HTTPException(status_code=400, detail=f"A categoria '{categoria_input.nome}' já está cadastrada.")
@@ -35,17 +35,17 @@ def buscar_categoria(categoria_id, db):
 def atualizar_categoria(categoria_id, categoria_input, db):
     """UPDATE: Atualiza o nome de uma categoria existente.
 
-    Recebe o schema `CategoriaCreate` para os dados de entrada e retorna mensagem.
+    Recebe o schema `CategoriaCreate` para os dados de entrada e retorna a categoria atualizada.
     """
     categoria = db.query(Categoria).filter(Categoria.id == categoria_id).first()
     if not categoria:
         raise HTTPException(status_code=404, detail=f"Não foi possível atualizar: Categoria com ID {categoria_id} não existe.")
-    
+
     try:
         categoria.nome = categoria_input.nome
         db.commit()
         db.refresh(categoria)
-        return {"mensagem": "Categoria atualizada com sucesso."}
+        return {"mensagem": "Categoria atualizada com sucesso.", "categoria": categoria}
     except Exception:
         db.rollback()
         raise HTTPException(status_code=400, detail=f"Não foi possível atualizar: O nome '{categoria_input.nome}' já está em uso por outra categoria.")
@@ -56,7 +56,14 @@ def deletar_categoria(categoria_id, db):
     categoria = db.query(Categoria).filter(Categoria.id == categoria_id).first()
     if not categoria:
         raise HTTPException(status_code=404, detail=f"Não foi possível deletar: Categoria com ID {categoria_id} não existe.")
-    
-    db.delete(categoria)
-    db.commit()
-    return {"mensagem": "Categoria deletada com sucesso."}
+
+    try:
+        db.delete(categoria)
+        db.commit()
+        return {"mensagem": "Categoria deletada com sucesso."}
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(
+            status_code=400,
+            detail="Não foi possível deletar a categoria porque ela está vinculada a registros.",
+        ) from exc

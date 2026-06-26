@@ -12,3 +12,8 @@ class CategoriaResponse(CategoriaBase):
 
     class Config:
         from_attributes = True
+
+
+class CategoriaMensagemResponse(BaseModel):
+    mensagem: str
+    categoria: CategoriaResponse

@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Integer, String, create_engine, ForeignKey, JSON
+from sqlalchemy import Column, Integer, String, ForeignKey, JSON
 from passlib.hash import sha256_crypt as sha256
-from ..main import Base
+from src.main import Base
 
 class Usuario(Base):
     __tablename__ = 'Usuario'

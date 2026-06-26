@@ -18,3 +18,8 @@ class PerguntaResponse(PerguntaBase):
     class Config:
         from_attributes = True
 
+
+class PerguntaMensagemResponse(BaseModel):
+    mensagem: str
+    pergunta: PerguntaResponse
+

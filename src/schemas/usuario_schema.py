@@ -22,6 +22,11 @@ class MensagemResponse(BaseModel):
     mensagem: str
 
 
+class UsuarioMensagemResponse(BaseModel):
+    mensagem: str
+    usuario: UsuarioResponse
+
+
 class UsuarioUpdateProgresso(BaseModel):
     acerto_total: int
     erro_total: int
