@@ -31,7 +31,7 @@ def criar_conta(db, dados):
     db.commit()
     db.refresh(novo_user)
     
-    return {"mensagem": "Conta criada com sucesso."}
+    return novo_user
 
 
 def dados(db, nome):
